@@ -10,8 +10,8 @@ my recv() calls when dealing with sockets.
 Pretty simple to use, just include "buffer.h" and copy the code below, or
 better, just check out buffer_example.c. 
 
-
-``` // create the buffer container
+```
+    // create the buffer container
     buffer_data *buff;
     buff = buffer_init(64); // make the initial size anything you want.
     
