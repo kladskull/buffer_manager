@@ -14,10 +14,5 @@ $(EXECUTABLE): $(OBJECTS)
 .cpp.o:
 	$(CC) $(CFLAGS) $< -o $@
 
-test:	$(TEST_OBJECTS)
-	$(CC) $(LDFLAGS) $(TEST_OBJECTS) -o $@
-
-
-
 clean:
 	rm -f $(EXECUTABLE) *.o
