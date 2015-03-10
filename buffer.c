@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <stddef.h>
+#include <limits.h>
 
 #include "buffer.h"
 
@@ -32,18 +33,18 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-buffer_data * buffer_init(const size_t initial_size) {
+buffer_data * buffer_init(unsigned int initial_size) {
     
     buffer_data * buffer = NULL;
-    
+        
+    // only allow max initial size of SIZE_MAX
+    if (initial_size > 65535) {
+        return NULL;
+    }
+
     // malloc the space for a pointer to a buffer_data
     buffer = malloc(sizeof(buffer_data));
     if (buffer == NULL) {
-        return NULL;
-    }
-    
-    // only allow max initial size of SIZE_MAX
-    if (initial_size > SIZE_MAX) {
         return NULL;
     }
     
@@ -83,9 +84,9 @@ buffer_data * buffer_init(const size_t initial_size) {
 //     keep track of the internal buffer and its working parameters.
 //
 //       typedef struct {
-//           size_t length;        // the current length of the content in bytes
-//           size_t capacity;      // the total capacity of "content" in bytes
-//           size_t expand_length; // the amount to expand the buffer on resize
+//           unsigned int length;        // the current length of the content in bytes
+//           unsigned int capacity;      // the total capacity of "content" in bytes
+//           unsigned int expand_length; // the amount to expand the buffer on resize
 //           char * content;       // the target for appending data
 //       } buffer_data;
 //
@@ -105,18 +106,18 @@ buffer_data * buffer_init(const size_t initial_size) {
 // 
 ////////////////////////////////////////////////////////////////////////////////
 
-ssize_t buffer_append(buffer_data * buffer, const char * append_data) {
+int buffer_append(buffer_data * buffer, const char * append_data) {
 
     // ensure there IS something to append.. 
-    const size_t append_len = strlen(append_data) + 1; // +1 for NUL Byte
+    const unsigned int append_len = strlen(append_data);
     if (append_len < 1) {
         return -1;
     }
 
     // is there enough space, or should we reallocate memory?
-    if (buffer->capacity > buffer->length + append_len) {
+    if (buffer->length + append_len > buffer->capacity) {
 
-        const size_t realloc_size = 
+        const unsigned int realloc_size = 
             buffer->capacity + append_len + buffer->expand_length;
         
         // allocate the new buffer
@@ -133,7 +134,7 @@ ssize_t buffer_append(buffer_data * buffer, const char * append_data) {
         // update the struct with the new values
         buffer->content = new_buffer;       // new buffer content
         buffer->capacity = realloc_size;    // add the amount to expand beyond our initial needs
-        buffer->length += append_len;
+        buffer->length = buffer->length + append_len;
         
     } else {
         // append the string
@@ -164,9 +165,9 @@ ssize_t buffer_append(buffer_data * buffer, const char * append_data) {
 //     keep track of the internal buffer and its working parameters.
 //
 //       typedef struct {
-//           size_t length;        // the current length of the content in bytes
-//           size_t capacity;      // the total capacity of "content" in bytes
-//           size_t expand_length; // the amount to expand the buffer on resize
+//           unsigned int length;        // the current length of the content in bytes
+//           unsigned int capacity;      // the total capacity of "content" in bytes
+//           unsigned int expand_length; // the amount to expand the buffer on resize
 //           char * content;       // the target for appending data
 //       } buffer_data;
 //
